@@ -18,47 +18,19 @@ import static io.restassured.RestAssured.requestSpecification;
 import static org.hamcrest.Matchers.*;
 
 @RunWith(DataProviderRunner.class)
-public class RestAssuredExamples {
+public class RestAssuredExamplesAnswers {
 
-    private static String myAuthenticationToken;
 
-    /*
+
+
+    public static RequestSpecification requestspec;
+
     @BeforeClass
-    public static void retrieveToken() {
+    public static void createRequestSpecification(){
 
-        myAuthenticationToken =
+        requestSpec = new RequestSpecBuilder().
+                setBaseUri("http://api.zippopotam.us").build();
 
-            given().
-                auth().
-                preemptive().
-                basic("username", "password").
-            when().
-                get("https://my.secure/api").
-            then().
-                extract().
-                path("");
-    }
-    */
-
-    @Test
-    public void usePreviouslyStoredAuthToken() {
-
-        given().
-            auth().
-            oauth2(myAuthenticationToken).
-        when().
-            get("https://my.very.secure/api").
-        then().
-            assertThat().
-            statusCode(200);
-    }
-
-    @DataProvider
-    public static Object[][] driverData() {
-        return new Object[][] {
-            { "hamilton", "44" },
-            { "max_verstappen", "33" }
-        };
     }
 
     @Test
@@ -112,10 +84,10 @@ public class RestAssuredExamples {
     public void validatePlacesBody(String country,String zipCode,String placeName) {
 
         given().
-                log().all().
+                spec(requestSpec).
                 pathParam("countryCode",country).pathParam("zipCode",zipCode).
         when().
-                get("http://api.zippopotam.us/{countryCode}/{zipCode}").
+                get("/{countryCode}/{zipCode}").
         then().
                 assertThat().body("places[0].'place name'",equalTo(placeName));
 
@@ -180,18 +152,7 @@ public class RestAssuredExamples {
             body("MRData.DriverTable.Drivers.permanentNumber[0]", equalTo("33"));
     }
 
-    @Test
-    @UseDataProvider("driverData")
-    public void checkPermanentNumberForDriver(String driverName, String permanentNumber) {
 
-        given().
-            pathParam("driver", driverName).
-        when().
-            get("http://ergast.com/api/f1/drivers/{driver}.json").
-        then().
-            assertThat().
-            body("MRData.DriverTable.Drivers.permanentNumber[0]",equalTo(permanentNumber));
-    }
 
     @Test
     public void useBasicAuthentication() {
